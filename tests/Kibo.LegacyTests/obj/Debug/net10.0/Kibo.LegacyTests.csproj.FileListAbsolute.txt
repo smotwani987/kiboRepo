@@ -97,3 +97,4 @@
 /Users/sahilmotwani/Downloads/Kibo Challenge/kiboRepo/tests/Kibo.LegacyTests/bin/Debug/net10.0/CoverletSourceRootsMapping_Kibo.LegacyTests
 /Users/sahilmotwani/Downloads/Kibo Challenge/kiboRepo/tests/Kibo.LegacyTests/bin/Debug/net10.0/Kibo.TestingFramework.dll
 /Users/sahilmotwani/Downloads/Kibo Challenge/kiboRepo/tests/Kibo.LegacyTests/bin/Debug/net10.0/Kibo.TestingFramework.pdb
+/Users/sahilmotwani/Downloads/Kibo Challenge/kiboRepo/tests/Kibo.LegacyTests/obj/Debug/net10.0/Kibo.LegacyTests.sourcelink.json

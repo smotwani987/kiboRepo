@@ -23,19 +23,14 @@ public class OrderTests
     {
         using var client = new KiboApiClient();
 
-        var order = new
-        {
-            CustomerEmail = "john.doe@example.com",
-            LineItems = new[]
-            {
-                new
-                {
-                    ProductCode = "SKU-001",
-                    Quantity = 2,
-                    UnitPrice = 29.99m
-                }
-            }
-        };
+        var order = OrderBuilder.New()
+            .WithCustomerEmail("john.doe@example.com")
+            .WithoutLineItems()
+            .WithLineItem(LineItemBuilder.New()
+                .WithProductCode("SKU-001")
+                .WithQuantity(2)
+                .WithUnitPrice(29.99m))
+            .Build();
 
         var response = await client.PostAsync("/v1/orders", order);
 
@@ -56,19 +51,15 @@ public class OrderTests
 
         // NOTE: Intentionally NOT adding x-kibo-tenant header
 
-        // BAD: Duplicate JSON construction
-        var json = """
-        {
-            "customerEmail": "no-tenant@example.com",
-            "lineItems": [
-                {
-                    "productCode": "SKU-999",
-                    "quantity": 1,
-                    "unitPrice": 9.99
-                }
-            ]
-        }
-        """;
+        var json = JsonSerializer.Serialize(
+            OrderBuilder.New()
+                .WithCustomerEmail("no-tenant@example.com")
+                .WithoutLineItems()
+                .WithLineItem(LineItemBuilder.New()
+                    .WithProductCode("SKU-999")
+                    .WithQuantity(1)
+                    .WithUnitPrice(9.99m))
+                .Build());
 
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -89,19 +80,15 @@ public class OrderTests
         // BAD: Duplicated header setup
         client.DefaultRequestHeaders.Add("x-kibo-tenant", "tenant-abc-123");
 
-        // BAD: Copy-pasted JSON (third time now)
-        var json = """
-        {
-            "customerEmail": "status-check@example.com",
-            "lineItems": [
-                {
-                    "productCode": "SKU-042",
-                    "quantity": 1,
-                    "unitPrice": 49.99
-                }
-            ]
-        }
-        """;
+        var json = JsonSerializer.Serialize(
+            OrderBuilder.New()
+                .WithCustomerEmail("status-check@example.com")
+                .WithoutLineItems()
+                .WithLineItem(LineItemBuilder.New()
+                    .WithProductCode("SKU-042")
+                    .WithQuantity(1)
+                    .WithUnitPrice(49.99m))
+                .Build());
 
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 

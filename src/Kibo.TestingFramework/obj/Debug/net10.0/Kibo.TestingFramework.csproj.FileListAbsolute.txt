@@ -9,3 +9,4 @@
 /Users/sahilmotwani/Downloads/Kibo Challenge/kiboRepo/src/Kibo.TestingFramework/obj/Debug/net10.0/refint/Kibo.TestingFramework.dll
 /Users/sahilmotwani/Downloads/Kibo Challenge/kiboRepo/src/Kibo.TestingFramework/obj/Debug/net10.0/Kibo.TestingFramework.pdb
 /Users/sahilmotwani/Downloads/Kibo Challenge/kiboRepo/src/Kibo.TestingFramework/obj/Debug/net10.0/ref/Kibo.TestingFramework.dll
+/Users/sahilmotwani/Downloads/Kibo Challenge/kiboRepo/src/Kibo.TestingFramework/obj/Debug/net10.0/Kibo.TestingFramework.sourcelink.json
