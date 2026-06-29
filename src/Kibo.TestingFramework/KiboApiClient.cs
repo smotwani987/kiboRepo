@@ -8,18 +8,25 @@ public sealed class KiboApiClient : IDisposable
 {
     private const string TenantHeaderName = "x-kibo-tenant";
     private const string CorrelationIdHeaderName = "x-correlation-id";
+    private const string BaseUrlEnvironmentVariableName = "KIBO_BASE_URL";
+    private const string DefaultBaseUrl = "http://localhost:5000";
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     private readonly HttpClient _httpClient;
     private readonly string _tenantId;
 
-    public KiboApiClient(string baseUrl = "http://localhost:5000", string tenantId = "tenant-abc-123", bool? enableLogging = null)
+    public KiboApiClient(
+        string? baseUrl = null,
+        string tenantId = "tenant-abc-123",
+        bool? enableLogging = null)
     {
         _tenantId = tenantId;
         LoggingEnabled = enableLogging ?? IsLoggingEnabledFromEnvironment();
         _httpClient = new HttpClient
         {
-            BaseAddress = new Uri(baseUrl, UriKind.Absolute)
+            BaseAddress = new Uri(
+                ResolveBaseUrl(baseUrl, Environment.GetEnvironmentVariable(BaseUrlEnvironmentVariableName)),
+                UriKind.Absolute)
         };
     }
 
@@ -111,6 +118,18 @@ public sealed class KiboApiClient : IDisposable
             Environment.GetEnvironmentVariable("KIBO_API_LOGGING"),
             "true",
             StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string ResolveBaseUrl(string? explicitBaseUrl, string? environmentBaseUrl)
+    {
+        if (!string.IsNullOrWhiteSpace(explicitBaseUrl))
+        {
+            return explicitBaseUrl;
+        }
+
+        return string.IsNullOrWhiteSpace(environmentBaseUrl)
+            ? DefaultBaseUrl
+            : environmentBaseUrl;
     }
 
     private static IReadOnlyDictionary<string, string> CaptureHeaders(HttpRequestMessage request)

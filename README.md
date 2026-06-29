@@ -1,6 +1,8 @@
 # 🚀 Kibo SDET Challenge
 
-Refactored the legacy Kibo API tests into a reusable **SDET testing framework / SDK** with cleaner test design, polling, builders, observability, and GenAI-assisted edge coverage.
+Refactored the legacy Kibo API tests into a reusable **SDET testing framework / SDK**
+with cleaner test design, polling, builders, observability, and GenAI-assisted edge
+coverage.
 
 ![.NET](https://img.shields.io/badge/.NET-10-purple)
 ![Tests](https://img.shields.io/badge/Tests-15%20Passing-brightgreen)
@@ -11,7 +13,7 @@ Refactored the legacy Kibo API tests into a reusable **SDET testing framework / 
 ## ✅ What Was Improved
 
 | Area | Before | After |
-|---|---|---|
+| --- | --- | --- |
 | API calls | Direct `HttpClient` in tests | Reusable `KiboApiClient` |
 | Test data | Inline JSON | Fluent builders |
 | Waiting | `Thread.Sleep()` | Generic polling utility |
@@ -71,7 +73,7 @@ dotnet test Kibo.SDET.Challenge.sln
 ## ⚙️ Environment Variables
 
 | Variable | Purpose |
-|---|---|
+| --- | --- |
 | `KIBO_BASE_URL` | Override API base URL. Default: `http://localhost:5000` |
 | `KIBO_API_LOGGING=true` | Enables request/response console logging |
 
@@ -86,7 +88,7 @@ KIBO_API_LOGGING=true dotnet test Kibo.SDET.Challenge.sln
 ## 📋 Task Coverage
 
 | Task | Implementation |
-|---|---|
+| --- | --- |
 | Task 1 | Reusable API client and response wrapper |
 | Task 2 | Fluent `OrderBuilder` and `LineItemBuilder` |
 | Task 3 | Generic async `Poller` replacing `Thread.Sleep()` |
@@ -108,14 +110,15 @@ Elapsed time
 Correlation ID
 ```
 
-Logging is **off by default** to keep CI output clean, but diagnostics remain available through `ApiResponse` and failed assertions.
+Logging is **off by default** to keep CI output clean, but diagnostics remain
+available through `ApiResponse` and failed assertions.
 
 ---
 
 ## 🧪 Edge Cases Covered
 
 | Edge Case | Purpose |
-|---|---|
+| --- | --- |
 | SQL injection in `x-kibo-tenant` | Security validation |
 | Zero / negative pricing | Financial validation |
 | Extremely long `customerEmail` | Input length validation |
@@ -124,13 +127,15 @@ Logging is **off by default** to keep CI output clean, but diagnostics remain av
 | Unicode / special characters | Encoding behavior |
 | Oversized payload | Payload handling |
 
-Some destructive tests assert the mock API's current behavior and document validation gaps in comments instead of intentionally failing the suite.
+Some destructive tests assert the mock API's current behavior and document
+validation gaps in comments instead of intentionally failing the suite.
 
 ---
 
 ## 🤖 AI Usage
 
-AI was used for scaffolding, review, edge-case brainstorming, observability design, and documentation. Outputs were manually reviewed and refined before committing.
+AI was used for scaffolding, review, edge-case brainstorming, observability design,
+and documentation. Outputs were manually reviewed and refined before committing.
 
 See:
 

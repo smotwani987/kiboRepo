@@ -37,6 +37,7 @@ public static class Poller
         }
 
         throw new TimeoutException(
-            $"{timeoutMessage} Timed out after {timeout.TotalSeconds:0.###}s while polling every {interval.TotalMilliseconds:0}ms. Last result: {lastResult}");
+            $"{timeoutMessage} Timed out after {timeout.TotalSeconds:0.###}s while polling every " +
+            $"{interval.TotalMilliseconds:0}ms. Last result: {lastResult}");
     }
 }

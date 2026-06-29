@@ -6,6 +6,20 @@ namespace Kibo.LegacyTests;
 public class ObservabilityTests
 {
     [Fact]
+    public void BaseUrlResolution_UsesEnvironmentValue_WhenExplicitBaseUrlIsOmitted()
+    {
+        var method = typeof(KiboApiClient).GetMethod(
+            "ResolveBaseUrl",
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+
+        var resolvedBaseUrl = method!.Invoke(
+            obj: null,
+            parameters: [null, "http://example.test:1234"]);
+
+        Assert.Equal("http://example.test:1234", resolvedBaseUrl);
+    }
+
+    [Fact]
     public async Task ApiResponse_CapturesElapsedTime()
     {
         using var client = new KiboApiClient();
