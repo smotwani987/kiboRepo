@@ -49,3 +49,22 @@ I verified that:
 
 **Final Outcome:**  
 Task 2 was completed successfully. Test data creation is now reusable, readable, and ready for edge-case testing.
+
+## Prompt 2 — Fluent Builders and Review Finding
+
+**Tool Used:** Codex  
+**Reasoning Mode:** Medium  
+**Prompt Summary:**  
+I asked AI to implement fluent `OrderBuilder` and `LineItemBuilder` classes and refactor existing tests to use builders where applicable.
+
+**AI Suggested / Implemented:**  
+- Added `OrderBuilder.cs`
+- Added `LineItemBuilder.cs`
+- Updated `OrderTests.cs`
+- Verified `dotnet test Kibo.SDET.Challenge.sln` passed with 4 tests
+
+**Manual Review Finding:**  
+After reviewing the changed `OrderTests.cs`, I noticed that three tests were still directly using `HttpClient`. This meant the Task 1 refactoring was only partially applied.
+
+**Action Taken:**  
+I treated this as a review gap and planned a follow-up cleanup task to remove remaining direct `HttpClient` usage from legacy tests.

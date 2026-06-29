@@ -29,6 +29,11 @@ public sealed class KiboApiClient : IDisposable
         return SendAsync(request, requestBody: null);
     }
 
+    public Task<ApiResponse> GetOrderAsync(Guid orderId, bool includeTenantHeader = true)
+    {
+        return GetAsync($"/v1/orders/{orderId}", includeTenantHeader);
+    }
+
     public Task<ApiResponse> PostAsync(string path, object body, bool includeTenantHeader = true)
     {
         var requestBody = JsonSerializer.Serialize(body, JsonOptions);
@@ -37,6 +42,11 @@ public sealed class KiboApiClient : IDisposable
         request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
 
         return SendAsync(request, requestBody);
+    }
+
+    public Task<ApiResponse> CreateOrderAsync(OrderRequest order, bool includeTenantHeader = true)
+    {
+        return PostAsync("/v1/orders", order, includeTenantHeader);
     }
 
     public void Dispose()

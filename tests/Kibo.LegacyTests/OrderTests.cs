@@ -1,6 +1,4 @@
 using System.Net;
-using System.Text;
-using System.Text.Json;
 using Kibo.TestingFramework;
 
 namespace Kibo.LegacyTests;
@@ -32,7 +30,7 @@ public class OrderTests
                 .WithUnitPrice(29.99m))
             .Build();
 
-        var response = await client.PostAsync("/v1/orders", order);
+        var response = await client.CreateOrderAsync(order);
 
         Assert.True(
             response.StatusCode == HttpStatusCode.Created,
@@ -43,62 +41,43 @@ public class OrderTests
     [Fact]
     public async Task CreateOrder_WithoutTenantHeader_Returns401()
     {
-        // BAD: Another brand-new HttpClient
-        var client = new HttpClient();
+        using var client = new KiboApiClient();
+        var order = OrderBuilder.New()
+            .WithCustomerEmail("no-tenant@example.com")
+            .WithoutLineItems()
+            .WithLineItem(LineItemBuilder.New()
+                .WithProductCode("SKU-999")
+                .WithQuantity(1)
+                .WithUnitPrice(9.99m))
+            .Build();
 
-        // BAD: Same hardcoded URL
-        var url = "http://localhost:5000/v1/orders";
+        var response = await client.CreateOrderAsync(order, includeTenantHeader: false);
 
-        // NOTE: Intentionally NOT adding x-kibo-tenant header
-
-        var json = JsonSerializer.Serialize(
-            OrderBuilder.New()
-                .WithCustomerEmail("no-tenant@example.com")
-                .WithoutLineItems()
-                .WithLineItem(LineItemBuilder.New()
-                    .WithProductCode("SKU-999")
-                    .WithQuantity(1)
-                    .WithUnitPrice(9.99m))
-                .Build());
-
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        var response = await client.PostAsync(url, content);
-
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.True(
+            response.StatusCode == HttpStatusCode.Unauthorized,
+            $"Expected 401 Unauthorized but received {(int)response.StatusCode} {response.StatusCode}.{Environment.NewLine}{response.Diagnostics}");
     }
 
     [Fact]
     public async Task GetOrder_AfterCreation_StatusBecomesReadyForFulfillment()
     {
-        // BAD: Yet another HttpClient
-        var client = new HttpClient();
+        using var client = new KiboApiClient();
+        var order = OrderBuilder.New()
+            .WithCustomerEmail("status-check@example.com")
+            .WithoutLineItems()
+            .WithLineItem(LineItemBuilder.New()
+                .WithProductCode("SKU-042")
+                .WithQuantity(1)
+                .WithUnitPrice(49.99m))
+            .Build();
 
-        // BAD: Hardcoded URL (again)
-        var baseUrl = "http://localhost:5000";
+        var createResponse = await client.CreateOrderAsync(order);
+        Assert.True(
+            createResponse.StatusCode == HttpStatusCode.Created,
+            $"Expected 201 Created but received {(int)createResponse.StatusCode} {createResponse.StatusCode}.{Environment.NewLine}{createResponse.Diagnostics}");
 
-        // BAD: Duplicated header setup
-        client.DefaultRequestHeaders.Add("x-kibo-tenant", "tenant-abc-123");
-
-        var json = JsonSerializer.Serialize(
-            OrderBuilder.New()
-                .WithCustomerEmail("status-check@example.com")
-                .WithoutLineItems()
-                .WithLineItem(LineItemBuilder.New()
-                    .WithProductCode("SKU-042")
-                    .WithQuantity(1)
-                    .WithUnitPrice(49.99m))
-                .Build());
-
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        var createResponse = await client.PostAsync($"{baseUrl}/v1/orders", content);
-        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
-
-        // Extract the order ID from the response
-        var createBody = await createResponse.Content.ReadAsStringAsync();
-        var createdOrder = JsonSerializer.Deserialize<JsonElement>(createBody);
-        var orderId = createdOrder.GetProperty("id").GetString();
+        var createdOrder = createResponse.Deserialize<OrderResponse>();
+        Assert.NotNull(createdOrder);
 
         // ============================================================
         // 🐛 THE QA FLAW — Thread.Sleep makes this test brittle & slow.
@@ -108,27 +87,23 @@ public class OrderTests
         // ============================================================
         Thread.Sleep(6000);
 
-        var getResponse = await client.GetAsync($"{baseUrl}/v1/orders/{orderId}");
-        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+        var getResponse = await client.GetOrderAsync(createdOrder.Id);
+        Assert.True(
+            getResponse.StatusCode == HttpStatusCode.OK,
+            $"Expected 200 OK but received {(int)getResponse.StatusCode} {getResponse.StatusCode}.{Environment.NewLine}{getResponse.Diagnostics}");
 
-        var getBody = await getResponse.Content.ReadAsStringAsync();
-        Assert.Contains("ReadyForFulfillment", getBody);
+        Assert.Contains("ReadyForFulfillment", getResponse.Body);
     }
 
     [Fact]
     public async Task GetOrder_WithInvalidId_Returns404()
     {
-        // BAD: Fresh HttpClient again
-        var client = new HttpClient();
+        using var client = new KiboApiClient();
 
-        // BAD: Hardcoded URL (fourth occurrence)
-        var url = $"http://localhost:5000/v1/orders/{Guid.NewGuid()}";
+        var response = await client.GetOrderAsync(Guid.NewGuid());
 
-        // BAD: Duplicated tenant header even though it's not strictly needed for GET
-        client.DefaultRequestHeaders.Add("x-kibo-tenant", "tenant-abc-123");
-
-        var response = await client.GetAsync(url);
-
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.True(
+            response.StatusCode == HttpStatusCode.NotFound,
+            $"Expected 404 Not Found but received {(int)response.StatusCode} {response.StatusCode}.{Environment.NewLine}{response.Diagnostics}");
     }
 }

@@ -58,3 +58,10 @@ public sealed class OrderBuilder
 }
 
 public sealed record OrderRequest(string CustomerEmail, IReadOnlyCollection<LineItemRequest> LineItems);
+
+public sealed record OrderResponse(
+    Guid Id,
+    string TenantId,
+    string CustomerEmail,
+    string Status,
+    IReadOnlyCollection<LineItemRequest> LineItems);
