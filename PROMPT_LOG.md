@@ -117,3 +117,14 @@ I verified:
 - No `Thread.Sleep`
 - No raw `JsonSerializer.Serialize` usage in tests
 - `dotnet test Kibo.SDET.Challenge.sln` passed with 11 tests
+
+## Prompt 6 — Test Observability and Diagnostics
+
+**Tool Used:** Codex  
+**Reasoning Mode:** Medium  
+
+**Prompt Summary:**  
+I asked AI to help scaffold the observability design for API tests, including request/response capture, timing, correlation IDs, and diagnostics-rich assertion failures.
+
+**How I Reviewed It:**  
+I ensured logging is toggleable and non-intrusive through `KIBO_API_LOGGING`, while diagnostics remain available on every `ApiResponse` even when console logging is disabled. I also verified timing and correlation data are exposed to support CI failure debugging.

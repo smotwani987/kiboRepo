@@ -139,9 +139,7 @@ public class OrderEdgeCaseTests
 
     private static OrderResponse AssertCreated(ApiResponse response)
     {
-        Assert.True(
-            response.StatusCode == HttpStatusCode.Created,
-            $"Expected 201 Created but received {(int)response.StatusCode} {response.StatusCode}.{Environment.NewLine}{response.Diagnostics}");
+        response.ShouldHaveStatusCode(HttpStatusCode.Created);
 
         var createdOrder = response.Deserialize<OrderResponse>();
         Assert.NotNull(createdOrder);

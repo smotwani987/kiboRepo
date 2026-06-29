@@ -20,6 +20,16 @@ public sealed class ApiResponse
 
     public HttpDiagnostics Diagnostics { get; }
 
+    public TimeSpan Elapsed => Diagnostics.Elapsed;
+
+    public double ElapsedMs => Diagnostics.ElapsedMs;
+
+    public string CorrelationId => Diagnostics.CorrelationId;
+
+    public string RequestLog => Diagnostics.RequestLog;
+
+    public string ResponseLog => Diagnostics.ResponseLog;
+
     public T? Deserialize<T>()
     {
         return JsonSerializer.Deserialize<T>(Body, JsonOptions);

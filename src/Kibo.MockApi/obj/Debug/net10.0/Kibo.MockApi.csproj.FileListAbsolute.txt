@@ -26,3 +26,4 @@
 /Users/sahilmotwani/Downloads/Kibo Challenge/kiboRepo/src/Kibo.MockApi/obj/Debug/net10.0/Kibo.MockApi.pdb
 /Users/sahilmotwani/Downloads/Kibo Challenge/kiboRepo/src/Kibo.MockApi/obj/Debug/net10.0/Kibo.MockApi.genruntimeconfig.cache
 /Users/sahilmotwani/Downloads/Kibo Challenge/kiboRepo/src/Kibo.MockApi/obj/Debug/net10.0/ref/Kibo.MockApi.dll
+/Users/sahilmotwani/Downloads/Kibo Challenge/kiboRepo/src/Kibo.MockApi/obj/Debug/net10.0/Kibo.MockApi.sourcelink.json

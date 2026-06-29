@@ -31,9 +31,7 @@ public class OrderTests
 
         var response = await client.CreateOrderAsync(order);
 
-        Assert.True(
-            response.StatusCode == HttpStatusCode.Created,
-            $"Expected 201 Created but received {(int)response.StatusCode} {response.StatusCode}.{Environment.NewLine}{response.Diagnostics}");
+        response.ShouldHaveStatusCode(HttpStatusCode.Created);
         Assert.Contains("Pending", response.Body);
     }
 
@@ -52,9 +50,7 @@ public class OrderTests
 
         var response = await client.CreateOrderAsync(order, includeTenantHeader: false);
 
-        Assert.True(
-            response.StatusCode == HttpStatusCode.Unauthorized,
-            $"Expected 401 Unauthorized but received {(int)response.StatusCode} {response.StatusCode}.{Environment.NewLine}{response.Diagnostics}");
+        response.ShouldHaveStatusCode(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
@@ -71,9 +67,7 @@ public class OrderTests
             .Build();
 
         var createResponse = await client.CreateOrderAsync(order);
-        Assert.True(
-            createResponse.StatusCode == HttpStatusCode.Created,
-            $"Expected 201 Created but received {(int)createResponse.StatusCode} {createResponse.StatusCode}.{Environment.NewLine}{createResponse.Diagnostics}");
+        createResponse.ShouldHaveStatusCode(HttpStatusCode.Created);
 
         var createdOrder = createResponse.Deserialize<OrderResponse>();
         Assert.NotNull(createdOrder);
@@ -85,9 +79,7 @@ public class OrderTests
             interval: TimeSpan.FromMilliseconds(500),
             timeoutMessage: $"Order {createdOrder.Id} did not become ReadyForFulfillment.");
 
-        Assert.True(
-            getResponse.StatusCode == HttpStatusCode.OK,
-            $"Expected 200 OK but received {(int)getResponse.StatusCode} {getResponse.StatusCode}.{Environment.NewLine}{getResponse.Diagnostics}");
+        getResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
 
         Assert.Contains("ReadyForFulfillment", getResponse.Body);
     }
@@ -99,8 +91,6 @@ public class OrderTests
 
         var response = await client.GetOrderAsync(Guid.NewGuid());
 
-        Assert.True(
-            response.StatusCode == HttpStatusCode.NotFound,
-            $"Expected 404 Not Found but received {(int)response.StatusCode} {response.StatusCode}.{Environment.NewLine}{response.Diagnostics}");
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
     }
 }

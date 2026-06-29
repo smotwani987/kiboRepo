@@ -13,14 +13,17 @@ public sealed class KiboApiClient : IDisposable
     private readonly HttpClient _httpClient;
     private readonly string _tenantId;
 
-    public KiboApiClient(string baseUrl = "http://localhost:5000", string tenantId = "tenant-abc-123")
+    public KiboApiClient(string baseUrl = "http://localhost:5000", string tenantId = "tenant-abc-123", bool? enableLogging = null)
     {
         _tenantId = tenantId;
+        LoggingEnabled = enableLogging ?? IsLoggingEnabledFromEnvironment();
         _httpClient = new HttpClient
         {
             BaseAddress = new Uri(baseUrl, UriKind.Absolute)
         };
     }
+
+    public bool LoggingEnabled { get; }
 
     public Task<ApiResponse> GetAsync(string path, bool includeTenantHeader = true)
     {
@@ -74,6 +77,7 @@ public sealed class KiboApiClient : IDisposable
         var stopwatch = Stopwatch.StartNew();
         var correlationId = request.Headers.GetValues(CorrelationIdHeaderName).Single();
         var requestUri = ResolveRequestUri(request);
+        var requestHeaders = CaptureHeaders(request);
 
         using var response = await _httpClient.SendAsync(request);
         var responseBody = await response.Content.ReadAsStringAsync();
@@ -85,13 +89,65 @@ public sealed class KiboApiClient : IDisposable
             Method = request.Method.Method,
             RequestUri = requestUri,
             CorrelationId = correlationId,
+            RequestHeaders = requestHeaders,
             RequestBody = requestBody,
             StatusCode = response.StatusCode,
+            ResponseHeaders = CaptureHeaders(response),
             ResponseBody = responseBody,
             Elapsed = stopwatch.Elapsed
         };
 
+        if (LoggingEnabled)
+        {
+            Console.WriteLine(diagnostics);
+        }
+
         return new ApiResponse(response.StatusCode, responseBody, diagnostics);
+    }
+
+    private static bool IsLoggingEnabledFromEnvironment()
+    {
+        return string.Equals(
+            Environment.GetEnvironmentVariable("KIBO_API_LOGGING"),
+            "true",
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static IReadOnlyDictionary<string, string> CaptureHeaders(HttpRequestMessage request)
+    {
+        var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var header in request.Headers)
+        {
+            headers[header.Key] = string.Join(", ", header.Value);
+        }
+
+        if (request.Content is not null)
+        {
+            foreach (var header in request.Content.Headers)
+            {
+                headers[header.Key] = string.Join(", ", header.Value);
+            }
+        }
+
+        return headers;
+    }
+
+    private static IReadOnlyDictionary<string, string> CaptureHeaders(HttpResponseMessage response)
+    {
+        var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var header in response.Headers)
+        {
+            headers[header.Key] = string.Join(", ", header.Value);
+        }
+
+        foreach (var header in response.Content.Headers)
+        {
+            headers[header.Key] = string.Join(", ", header.Value);
+        }
+
+        return headers;
     }
 
     private Uri ResolveRequestUri(HttpRequestMessage request)
