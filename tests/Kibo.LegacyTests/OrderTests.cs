@@ -12,7 +12,6 @@ namespace Kibo.LegacyTests;
 ///   • Hardcoded base URL (http://localhost:5000) copy-pasted everywhere
 ///   • x-kibo-tenant header logic duplicated in every method
 ///   • Raw JSON strings built inline instead of using a builder/model
-///   • Thread.Sleep(6000) used to wait for async status changes (brittle & slow)
 /// </summary>
 public class OrderTests
 {
@@ -79,15 +78,13 @@ public class OrderTests
         var createdOrder = createResponse.Deserialize<OrderResponse>();
         Assert.NotNull(createdOrder);
 
-        // ============================================================
-        // 🐛 THE QA FLAW — Thread.Sleep makes this test brittle & slow.
-        //    The API transitions the order after 5 seconds, so this
-        //    test just sleeps for 6 seconds and hopes for the best.
-        //    In CI/CD this will be flaky and waste pipeline time.
-        // ============================================================
-        Thread.Sleep(6000);
+        var getResponse = await Poller.UntilAsync(
+            () => client.GetOrderAsync(createdOrder.Id),
+            response => response.Body.Contains("ReadyForFulfillment"),
+            timeout: TimeSpan.FromSeconds(10),
+            interval: TimeSpan.FromMilliseconds(500),
+            timeoutMessage: $"Order {createdOrder.Id} did not become ReadyForFulfillment.");
 
-        var getResponse = await client.GetOrderAsync(createdOrder.Id);
         Assert.True(
             getResponse.StatusCode == HttpStatusCode.OK,
             $"Expected 200 OK but received {(int)getResponse.StatusCode} {getResponse.StatusCode}.{Environment.NewLine}{getResponse.Diagnostics}");
