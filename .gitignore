@@ -6,4 +6,4 @@ obj/
 __MACOSX/
 *.user
 *.suo
-*.cache
+*.cache.DS_Store
