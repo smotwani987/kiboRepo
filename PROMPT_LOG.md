@@ -68,3 +68,52 @@ After reviewing the changed `OrderTests.cs`, I noticed that three tests were sti
 
 **Action Taken:**  
 I treated this as a review gap and planned a follow-up cleanup task to remove remaining direct `HttpClient` usage from legacy tests.
+
+## Prompt 3 — Replace Fixed Sleep with Polling Utility
+
+**Tool Used:** Codex  
+**Reasoning Mode:** Medium  
+**Prompt Summary:**  
+I asked AI to replace brittle `Thread.Sleep()` usage with a reusable async polling utility.
+
+**AI Suggested / Implemented:**  
+- Added `Poller.cs`
+- Refactored `GetOrder_AfterCreation_StatusBecomesReadyForFulfillment`
+- Removed `Thread.Sleep()` from tests
+
+**How I Reviewed It:**  
+I verified there was no remaining `Thread.Sleep` usage by running:
+`grep -R "Thread.Sleep" tests/Kibo.LegacyTests`
+
+**Final Outcome:**  
+The test suite passed with 4 tests. The async status test is now more reliable and framework-driven.
+
+## Prompt 4 — GenAI-Inspired Edge Case Tests
+
+**Tool Used:** Codex  
+**Reasoning Mode:** Medium  
+
+**Prompt Summary:**  
+I used GenAI to brainstorm destructive and edge-case API test scenarios for the order endpoints. The initial implementation covered several scenarios, but I manually reviewed it against the official assignment examples and asked AI to realign the tests with the stated evaluation criteria.
+
+**Review and Refinement:**  
+After reviewing the candidate instructions, I noticed the test coverage needed to explicitly include the sample areas mentioned in the assignment:
+- SQL injection attempts in the `x-kibo-tenant` header
+- Negative or zero pricing in line items
+- Extremely long strings in `customerEmail`
+- Empty `lineItems` array
+- Missing required fields
+- Unicode / special characters
+- Oversized payloads
+
+I then asked Codex to update `OrderEdgeCaseTests.cs` so the tests clearly mapped to these examples while still using the reusable framework instead of raw HTTP.
+
+**Final Outcome:**  
+Added 7 GenAI-inspired edge-case tests. The tests document the mock API's current behavior, keep the suite green, and show security, validation, financial, encoding, and payload-size coverage.
+
+**Validation:**  
+I verified:
+- No direct `HttpClient` usage in tests
+- No `Thread.Sleep`
+- No raw `JsonSerializer.Serialize` usage in tests
+- `dotnet test Kibo.SDET.Challenge.sln` passed with 11 tests
